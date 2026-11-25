@@ -1,0 +1,32 @@
+python3 - <<'E'
+p='ecos-de-musgo.html'
+s=open(p,encoding='utf-8').read()
+s=s.replace("var ch = rm.map.charAt ? rm.map[ty].charAt(tx) : '.';","var ch = rm.map[ty].charAt(tx);")
+a=s.index("    // enemigo\n    if (b.dust < 1")
+bidx=s.index("    // barra de vida enemigo tras golpe")
+new="""    // enemigo
+    if (!b.ended) { b.d.draw(160 + (b.shake > 0 ? Math.sin(G.t * 60) * 4 : 0), b.d.cy, ready(), b.hurt > 0); }
+    else if (b.dust > 0) { for (var p = 0; p < 40; p++) R(160 + Math.sin(p * 7.3) * 50 + (p % 5) * (1 - b.dust) * 14 - 10, b.d.cy + 30 + Math.cos(p * 5.1) * 30 - (1 - b.dust) * 60, 2, 2, 'rgba(255,255,255,' + b.dust + ')'); }
+"""
+s=s[:a]+new+s[bidx:]
+open(p,'w',encoding='utf-8').write(s)
+# map row length check
+import re
+js=s
+for m in re.finditer(r"'([#.TSCN]{20,})'",s):
+    if len(m.group(1))!=20: print('bad row',m.group(1),len(m.group(1)))
+rows=re.findall(r"'([#.TSCN]{20})'",s); print(len(rows),'rows')
+E
+cat > /tmp/claude-0/-home-claude/6ffc00c4-1c75-55d2-9eef-be7fd89b97b4/scratchpad/t.js <<'E'
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch(); const p = await b.newPage({viewport:{width:900,height:800}});
+  const errs=[]; p.on('pageerror',e=>errs.push(e.message)); p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+  await p.goto('file:///home/claude/ecos-de-musgo.html');
+  await p.waitForTimeout(500);
+  const keys=['KeyZ','ArrowRight','ArrowLeft','ArrowUp','ArrowDown','KeyX'];
+  for(let i=0;i<900;i++){
+    const k = i<40 ? 'KeyZ' : (Math.random()<0.5?'KeyZ':keys[Math.floor(Math.random()*keys.length)]);
+    if(i>40 && Math.random()<0.7){ await p.keyboard.down('ArrowRight'); }
+    await p.keyboard.down(k); await p.waitForTimeout(25); await p.keyboard.up(k); await p.keyboard.up('ArrowRight');
+… (+9 more rows)
